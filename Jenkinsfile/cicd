@@ -1,0 +1,50 @@
+pipeline {
+agent {lable 'master'}
+stages {
+    // checkout the code in stage scm
+ stage('SCM') {
+       steps {
+                cleanWs()
+                echo " pulling changes from branch **** and from repo ****"
+                checkout poll: false, scm: [$class: 'GitSCM', branches: [[name: "$**branchname**]],
+                doGenerateSubmoduleConfigurations: false,
+                extensions: [[$class: 'CleanBeforeCheckout']],
+                gitTool: 'Default', submodulecfg: [],
+                userRemoteConfigs: [[credentialId: '*******',
+                                     url: "******"]]
+                 ]
+                 }
+                 }
+stage ('JDK_11') {
+               tools {
+                 jdk 'JDK_11'
+                 }
+                 steps{
+                     sh '''export JAVA_HOME="/opt/Installs/jdk-11.0.1"
+                            export PATH=$JAVA_HOME/bin:$PATH
+                            java -version
+                            '''
+                     }
+                     }
+stage ('Maven BUILD') {
+                    tools {
+                            jdk 'JDK_11'
+                            }
+                     steps {
+                              echo "starting build"
+                              sh 'mvn clean install'
+                              echo "clean install completed"
+                              }
+                              }
+stage ('Sonar Analysis') {
+                     steps {
+                              echo 'sonar analysis will be executed'
+                              scripts{
+                                    scannerHome = tool 'Sonar_Scanner'
+                                    }
+                                    withsSonarQubeEnv ('sonar'){
+                                    sh "*************"
+                                    sh 'sleep 10'
+                                    }
+                                    }
+                                    }
